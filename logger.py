@@ -52,12 +52,13 @@ def setup_logging() -> None:
     console_handler.setFormatter(CustomFormatter())
     root_logger.addHandler(console_handler)
 
-    # File handler - daily rotating log file
+    # File handler
     logs_dir = settings.LOG.DIR
     logs_dir.mkdir(parents=True, exist_ok=True)
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    file_handler = logging.FileHandler(logs_dir / f"{today}.log", encoding="utf-8")
+    file_handler = logging.FileHandler(
+        logs_dir / f"{datetime.now().strftime('%Y-%m-%d')}.log", encoding="utf-8"
+    )
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logging.Formatter(FILE_FORMAT))
     root_logger.addHandler(file_handler)
