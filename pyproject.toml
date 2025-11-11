@@ -1,0 +1,7 @@
+[project]
+name = "intakeq-bask-migration"
+version = "0.1.0"
+description = "Intake Q to Bask Health EHRs migration"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
