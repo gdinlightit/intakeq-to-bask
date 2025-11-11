@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Intake Q to Bask Health EHRs migration"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "aiolimiter>=1.2.1",
+    "boto3>=1.40.70",
+    "httpx>=0.28.1",
+    "pydantic>=2.12.4",
+    "pydantic-settings>=2.12.0",
+]
