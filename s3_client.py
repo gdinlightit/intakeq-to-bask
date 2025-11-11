@@ -1,3 +1,4 @@
+import io
 import logging
 import boto3
 from botocore.exceptions import ClientError
@@ -16,11 +17,11 @@ def upload_to_s3_and_get_url(
     key = f"{settings.S3.KEY_PREFIX}/{filename}"
 
     try:
-        s3_client.put_object(
+        s3_client.upload_fileobj(
+            Fileobj=io.BytesIO(file_content),
             Bucket=settings.S3.BUCKET,
             Key=key,
-            Body=file_content,
-            ContentType="text/csv",
+            ExtraArgs={"ContentType": "text/csv"},
         )
 
         url = s3_client.generate_presigned_url(
