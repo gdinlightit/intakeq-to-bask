@@ -8,6 +8,8 @@ from schemas import Stats
 
 logger = logging.getLogger(__name__)
 
+INTAKEQ_CSV_DELIMITER = ";"
+
 
 def format_height_to_feet_inches(inches: str | None) -> str | None:
     """Convert 62 -> 5'2\" """
@@ -51,7 +53,9 @@ def to_bask_row(patient: IntakeQPatient) -> dict[str, str | None | bool]:
 
 def transform_csv(input_csv: bytes) -> tuple[bytes, Stats]:
     """Transform IntakeQ CSV to Bask Health format."""
-    reader = csv.DictReader(f=io.StringIO(input_csv.decode("utf-8")), delimiter=";")
+    reader = csv.DictReader(
+        f=io.StringIO(input_csv.decode("utf-8")), delimiter=INTAKEQ_CSV_DELIMITER
+    )
 
     valid_rows, failed = [], 0
 
