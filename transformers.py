@@ -21,7 +21,7 @@ def format_height_to_feet_inches(inches: str | None) -> str | None:
         return None
 
 
-def to_bask_row(patient: IntakeQPatient) -> dict[str, str | None | bool]:
+def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
     """Transform IntakeQ patient to Bask Health CSV row."""
     return {
         "First Name": patient.first_name,
@@ -61,7 +61,7 @@ def transform_csv(input_csv: bytes) -> tuple[bytes, Stats]:
 
     for row_num, row in enumerate(iterable=reader, start=2):
         try:
-            valid_rows.append(to_bask_row(IntakeQPatient(**row)))
+            valid_rows.append(to_bask(IntakeQPatient(**row)))
         except ValidationError as e:
             failed += 1
             logger.error(
