@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel,
     DirectoryPath,
     Field,
+    FilePath,
     SecretStr,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -27,6 +28,9 @@ class IntakeQSettings(BaseModel):
     EXPORT_PROFILE_ID: str = Field(
         description="IntakeQ export profile ID for patient data"
     )
+    CSV_DELIMITER: str = Field(
+        default=";", description="IntakeQ export profile ID for patient data"
+    )
 
 
 class S3Settings(BaseModel):
@@ -42,7 +46,11 @@ class AWSSettings(BaseModel):
 class AppSettings(BaseModel):
     ENV: Literal["local", "production"] = Field(default="local")
     DATA_DIR: DirectoryPath = Field(
-        default=Path("./data"), description="Directory for input/output CSV files"
+        default=Path("./data"), description="Directory for output CSV files"
+    )
+    INPUT_CSV: FilePath = Field(
+        default=Path("./data/intakeq_migration_data.csv"),
+        description="CSV file to use as input",
     )
 
     @property
