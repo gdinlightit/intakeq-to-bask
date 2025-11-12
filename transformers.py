@@ -1,17 +1,24 @@
+from __future__ import annotations
 import csv
 import io
 import logging
 from pydantic import ValidationError
+from decorators import optional
 from models import IntakeQPatient
 from schemas import Stats
 
+from config import settings
 
 logger = logging.getLogger(__name__)
 
-INTAKEQ_CSV_DELIMITER = ";"
+
+format_name = optional(str.title)
+format_email = optional(str.lower)
+format_state = optional(str.upper)
 
 
-def format_height_to_feet_inches(inches: str | None) -> str | None:
+@optional
+def format_height_to_feet_inches(inches: str) -> str | None:
     """Convert 62 -> 5'2\" """
     try:
         total_inches = int(float(inches))
@@ -24,12 +31,12 @@ def format_height_to_feet_inches(inches: str | None) -> str | None:
 def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
     """Transform IntakeQ patient to Bask Health CSV row."""
     return {
-        "First Name": patient.first_name,
-        "Last name": patient.last_name,
-        "email": patient.email,
-        "phone number": patient.mobile_phone
-        or patient.home_phone
-        or patient.work_phone,
+        "First Name": format_name(patient.first_name),
+        "Last name": format_name(patient.last_name),
+        "email": format_email(patient.email),
+        "phone number": (
+            patient.mobile_phone or patient.home_phone or patient.work_phone
+        ),
         "DOB": patient.date_of_birth,
         'Height ("5\'9"")': format_height_to_feet_inches(patient.height_in_inches),
         "Weight (lbs)": patient.current_weight,
@@ -39,7 +46,7 @@ def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
         "Address 2": patient.unit_number,
         "Country": patient.country or "USA",
         "city": patient.city,
-        "state": patient.state,
+        "state": format_state(patient.state),
         "zip code": patient.postal_code,
         "Language": "English",
         "SMS consent(did the patient opt into marketing via SMS)": False,
@@ -54,7 +61,8 @@ def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
 def transform_csv(input_csv: bytes) -> tuple[bytes, Stats]:
     """Transform IntakeQ CSV to Bask Health format."""
     reader = csv.DictReader(
-        f=io.StringIO(input_csv.decode("utf-8")), delimiter=INTAKEQ_CSV_DELIMITER
+        f=io.StringIO(input_csv.decode("utf-8")),
+        delimiter=settings.INTAKEQ.CSV_DELIMITER,
     )
 
     valid_rows, failed = [], 0
@@ -64,22 +72,21 @@ def transform_csv(input_csv: bytes) -> tuple[bytes, Stats]:
             valid_rows.append(to_bask(IntakeQPatient(**row)))
         except ValidationError as e:
             failed += 1
-            logger.error(
+            logger.warning(
                 f"Row {row_num} failed: {row.get('ClientId', 'unknown')} - {e}"
             )
 
     output = io.StringIO()
 
-    writer = csv.DictWriter(output, fieldnames=list(valid_rows[0].keys()))
-    writer.writeheader()
-    writer.writerows(valid_rows)
+    if valid_rows:
+        writer = csv.DictWriter(output, fieldnames=list(valid_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(valid_rows)
 
     stats = Stats(
         total=len(valid_rows) + failed,
         successful=len(valid_rows),
         failed=failed,
     )
-
-    logger.info(f"Transformed {stats.successful}/{stats.total} patients")
 
     return output.getvalue().encode("utf-8"), stats
