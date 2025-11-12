@@ -2,23 +2,20 @@ from pydantic import BaseModel, field_validator, Field
 
 
 class IntakeQPatient(BaseModel):
-    # Required fields
     client_id: str = Field(alias="ClientId")
-    first_name: str = Field(alias="FirstName")
-    last_name: str = Field(alias="LastName")
 
-    # Contact info
+    first_name: str | None = Field(alias="FirstName")
+    last_name: str | None = Field(alias="LastName")
+
     email: str | None = Field(default=None, alias="Email")
     mobile_phone: str | None = Field(default=None, alias="MobilePhone")
     home_phone: str | None = Field(default=None, alias="HomePhone")
     work_phone: str | None = Field(default=None, alias="WorkPhone")
 
-    # Demographics
     date_of_birth: str | None = Field(default=None, alias="DateOfBirth")
     gender: str | None = Field(default=None, alias="Gender")
     sex: str | None = Field(default=None, alias="Sex")
 
-    # Address
     street_address: str | None = Field(default=None, alias="StreetAddress")
     unit_number: str | None = Field(default=None, alias="UnitNumber")
     city: str | None = Field(default=None, alias="City")
@@ -26,7 +23,6 @@ class IntakeQPatient(BaseModel):
     postal_code: str | None = Field(default=None, alias="PostalCode")
     country: str | None = Field(default=None, alias="Country")
 
-    # Medical data
     current_weight: str | None = Field(default=None, alias="Current Weight")
     height_in_inches: str | None = Field(default=None, alias="Height In Inches")
     current_medications: str | None = Field(default=None, alias="Current Medications")
@@ -67,7 +63,6 @@ class IntakeQPatient(BaseModel):
     @field_validator("height_in_inches", "current_weight")
     @classmethod
     def validate_numeric(cls, v: str | None) -> str | None:
-        """Validate numeric fields can be converted to numbers."""
         if not v or v.strip() == "":
             return None
         try:
