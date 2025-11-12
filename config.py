@@ -11,6 +11,18 @@ from pydantic import (
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class AppSettings(BaseModel):
+    ENV: Literal["local", "production"] = Field(default="local")
+    INPUT_CSV: FilePath = Field(
+        default=Path("./data/intakeq_migration_data.csv"),
+        description="CSV file to use as input",
+    )
+
+    @property
+    def is_local(self) -> bool:
+        return self.ENV == "local"
+
+
 class LoggingSettings(BaseModel):
     LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         default="INFO",
@@ -28,9 +40,7 @@ class IntakeQSettings(BaseModel):
     EXPORT_PROFILE_ID: str = Field(
         description="IntakeQ export profile ID for patient data"
     )
-    CSV_DELIMITER: str = Field(
-        default=";", description="IntakeQ export profile ID for patient data"
-    )
+    CSV_DELIMITER: str = Field(description="IntakeQ export profile ID for patient data")
 
 
 class S3Settings(BaseModel):
@@ -41,18 +51,6 @@ class S3Settings(BaseModel):
 
 class AWSSettings(BaseModel):
     REGION: str = Field(description="AWS region")
-
-
-class AppSettings(BaseModel):
-    ENV: Literal["local", "production"] = Field(default="local")
-    INPUT_CSV: FilePath = Field(
-        default=Path("./data/intakeq_migration_data.csv"),
-        description="CSV file to use as input",
-    )
-
-    @property
-    def is_local(self) -> bool:
-        return self.ENV == "local"
 
 
 class Settings(BaseSettings):
