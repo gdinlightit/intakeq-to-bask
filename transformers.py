@@ -18,14 +18,23 @@ format_state = optional(str.upper)
 
 
 @optional
-def format_height_to_feet_inches(inches: str) -> str | None:
-    """Convert 62 -> 5'2\" """
-    try:
-        total_inches = int(float(inches))
-        feet, remaining_inches = divmod(total_inches, 12)
-        return f"{feet}'{remaining_inches}\""
-    except (ValueError, TypeError):
+def format_height_to_feet_inches(height: str) -> str | None:
+    cleaned = height.strip().replace("'", "").replace('"', "")
+
+    if not cleaned.isdigit():
         return None
+
+    if len(cleaned) == 1:
+        # "9" -> "0'9"
+        return f"0'{cleaned}\""
+    elif len(cleaned) == 2:
+        # "62" = 6'2"
+        feet, inches = cleaned[0], cleaned[1]
+        return f"{feet}'{inches}\""
+    else:
+        # "611" = 6'11"
+        feet, inches = cleaned[:-2], cleaned[-2:]
+        return f"{feet}'{inches}\""
 
 
 def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
@@ -49,7 +58,7 @@ def to_bask(patient: IntakeQPatient) -> dict[str, str | None | bool]:
         "state": format_state(patient.state),
         "zip code": patient.postal_code,
         "Language": "English",
-        "SMS consent(did the patient opt into marketing via SMS)": False,
+        "SMS consent(did the patient opt into marketing via SMS)": True,
         "Drug": None,
         "current dose": None,
         "last order date": None,
