@@ -4,7 +4,6 @@ from datetime import datetime
 
 from logger import setup_logging
 from config import settings
-from intakeq_client import create_intakeq_client, download_csv_export
 from transformers import transform_csv
 from s3_client import upload_to_s3_and_get_url
 
@@ -13,13 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 async def get_data() -> bytes:
-    if settings.APP.is_local:
-        input_path = settings.APP.DATA_DIR / "intakeq_migration_data.csv"
-        logger.info(f"[DEV] Reading local CSV from {input_path}")
-        return input_path.read_bytes()
-
-    async with create_intakeq_client() as client:
-        return await download_csv_export(client)
+    input_path = settings.APP.INPUT_CSV
+    logger.info(f"Reading CSV from {input_path}")
+    return input_path.read_bytes()
 
 
 async def transform(input_csv: bytes) -> bytes:
@@ -37,9 +32,10 @@ async def upload_data(input_csv: bytes) -> str:
     if settings.APP.is_local:
         return "mocked_signed_url"
 
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
     return upload_to_s3_and_get_url(
         file_content=input_csv,
-        filename=f"bask_health_import_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        filename=f"bask_health_import_{now}.csv",
     )
 
 
