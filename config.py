@@ -45,9 +45,6 @@ class AWSSettings(BaseModel):
 
 class AppSettings(BaseModel):
     ENV: Literal["local", "production"] = Field(default="local")
-    DATA_DIR: DirectoryPath = Field(
-        default=Path("./data"), description="Directory for output CSV files"
-    )
     INPUT_CSV: FilePath = Field(
         default=Path("./data/intakeq_migration_data.csv"),
         description="CSV file to use as input",

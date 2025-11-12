@@ -1,6 +1,7 @@
 import logging
 import asyncio
 from datetime import datetime
+from pathlib import Path
 
 from logger import setup_logging
 from config import settings
@@ -21,8 +22,7 @@ async def transform(input_csv: bytes) -> bytes:
     bask_csv, stats = transform_csv(input_csv)
 
     if settings.APP.is_local:
-        output_path = settings.APP.DATA_DIR / "bask_migration_data.csv"
-        output_path.write_bytes(bask_csv)
+        Path("./data/bask_migration_data.csv").write_bytes(bask_csv)
 
     logger.info(f"Transformed {stats.successful}/{stats.total} patients successfully")
     return bask_csv
@@ -41,8 +41,6 @@ async def upload_data(input_csv: bytes) -> str:
 
 async def main():
     try:
-        settings.APP.DATA_DIR.mkdir(parents=True, exist_ok=True)
-
         logger.info("Extracting data from IntakeQ")
         intakeq_csv = await get_data()
         logger.info("Done")
