@@ -24,15 +24,12 @@ def format_height_to_feet_inches(height: str) -> str | None:
     if not cleaned.isdigit():
         return None
 
-    if len(cleaned) == 1:
-        # "9" -> "0'9"
+    if len(cleaned) == 1:  # "9" -> "0'9"
         return f"0'{cleaned}\""
-    elif len(cleaned) == 2:
-        # "62" = 6'2"
+    elif len(cleaned) == 2:  # "62" = 6'2"
         feet, inches = cleaned[0], cleaned[1]
         return f"{feet}'{inches}\""
-    else:
-        # "611" = 6'11"
+    else:  # "611" = 6'11"
         feet, inches = cleaned[:-2], cleaned[-2:]
         return f"{feet}'{inches}\""
 

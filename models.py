@@ -28,17 +28,15 @@ class IntakeQPatient(BaseModel):
     current_medications: str | None = Field(default=None, alias="Current Medications")
 
     model_config = {
-        "populate_by_name": True,  # Allow both alias and field name
+        "populate_by_name": True,
         "str_strip_whitespace": True,
     }
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str | None) -> str | None:
-        if not v or v == "":
+        if not v:
             return None
-        if "@" not in v:
-            raise ValueError(f"Invalid email: {v}")
         return v
 
     @field_validator("mobile_phone", "home_phone", "work_phone")
@@ -47,26 +45,22 @@ class IntakeQPatient(BaseModel):
         if not v:
             return None
         cleaned = "".join(c for c in v if c.isdigit())
-        if len(cleaned) == 11 and cleaned[0] == "1":
-            cleaned = cleaned[1:]
-        if len(cleaned) != 10:
-            raise ValueError(f"Phone must be 10 digits: {v}")
-        return cleaned
+        return cleaned or None
 
     @field_validator("current_medications")
     @classmethod
     def normalize_medications(cls, v: str | None) -> str | None:
-        if not v or v.lower() in ("none", "n/a"):
+        if not v:
             return None
         return v
 
     @field_validator("height_in_inches", "current_weight")
     @classmethod
     def validate_numeric(cls, v: str | None) -> str | None:
-        if not v or v.strip() == "":
+        if not v:
             return None
         try:
             float(v)
-            return v.strip()
+            return v
         except ValueError:
-            raise ValueError(f"Must be numeric: {v}")
+            return None
