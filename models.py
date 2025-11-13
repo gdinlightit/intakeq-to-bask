@@ -32,9 +32,9 @@ class IntakeQPatient(BaseModel):
         "str_strip_whitespace": True,
     }
 
-    @field_validator("email")
+    @field_validator("email", "current_medications")
     @classmethod
-    def validate_email(cls, v: str | None) -> str | None:
+    def normalize_empty_string_to_none(cls, v: str | None) -> str | None:
         if not v:
             return None
         return v
@@ -46,13 +46,6 @@ class IntakeQPatient(BaseModel):
             return None
         cleaned = "".join(c for c in v if c.isdigit())
         return cleaned or None
-
-    @field_validator("current_medications")
-    @classmethod
-    def normalize_medications(cls, v: str | None) -> str | None:
-        if not v:
-            return None
-        return v
 
     @field_validator("height_in_inches", "current_weight")
     @classmethod
